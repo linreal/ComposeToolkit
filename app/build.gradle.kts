@@ -1,0 +1,72 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    namespace = "io.github.linreal.composetoolkit"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "io.github.linreal.composetoolkit"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+        // Temporary direct wiring while composite plugin remains local-only
+        freeCompilerArgs += listOf(
+            "-P", "plugin:io.github.linreal.plugin.logging:enabled=true",
+            "-P", "plugin:io.github.linreal.plugin.logging:skipInline=true",
+            "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:enabled=true",
+            "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:skipInline=true",
+        )
+    }
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    implementation(project(":compiler-plugin:recomposition-tracker:runtime"))
+    implementation(project(":compiler-plugin:logger:runtime"))
+    implementation(project(":logging-annotations"))
+    // Directly wire compiler plugin classpaths for local development
+    kotlinCompilerPluginClasspath(project(":compiler-plugin:logger:plugin"))
+    kotlinCompilerPluginClasspath(project(":compiler-plugin:recomposition-tracker:plugin"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+}

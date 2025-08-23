@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/compiler-plugin" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger/plugin" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger/runtime" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/plugin" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/runtime" />
+            <option value="$PROJECT_DIR$/gradle-plugin" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/logger" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/recomposition-tracker" />
+            <option value="$PROJECT_DIR$/gradle-plugin/toolkit" />
+            <option value="$PROJECT_DIR$/logging-annotations" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
