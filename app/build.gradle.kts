@@ -33,6 +33,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs += listOf(
+            "-P", "plugin:com.linreal.plugin.logging:enabled=true",
+            "-P", "plugin:com.linreal.plugin.logging:skipInline=true"
+        )
     }
     buildFeatures {
         compose = true
@@ -40,6 +44,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":logging-annotations"))
+    kotlinCompilerPluginClasspath(project(":logging-compiler-plugin"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

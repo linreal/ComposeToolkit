@@ -10,7 +10,9 @@
 .DS_Store
 /build
 /captures
+/.kotlin
 .externalNativeBuild
 .cxx
 local.properties
 *.local.md
+/cc_tasks

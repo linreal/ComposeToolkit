@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Compose Toolkit"
 include(":app")
+include(":logging-annotations")
+include(":logging-compiler-plugin")
+include(":logging-gradle-plugin")
  
