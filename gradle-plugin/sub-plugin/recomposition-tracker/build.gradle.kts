@@ -4,7 +4,8 @@ plugins {
 }
 
 dependencies {
-    // Gradle plugin development only; compiler plugin will be added later.
+    implementation(project(":compiler-plugin:recomposition-tracker:plugin"))
+    // Gradle plugin development only.
     implementation(libs.kotlin.gradle.plugin.api)
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
 }
@@ -24,4 +25,3 @@ gradlePlugin {
 kotlin {
     jvmToolchain(17)
 }
-

@@ -1,5 +1,6 @@
 package com.linreal.recomposition.gradle
 
+import com.android.build.gradle.BaseExtension
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -7,16 +8,38 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
+open class RecompositionTrackerExtension {
+    var enabled: Boolean = true
+    var skipInline: Boolean = true
+    var onlyInDebug: Boolean = true
+}
+
 @Suppress("unused") // Used via reflection.
 class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project) {
-        // Extension could be added later as needs emerge.
         println("[RecompositionTrackerGradlePlugin] Applied to project: ${target.name}")
+        target.extensions.create("recompositionTracker", RecompositionTrackerExtension::class.java)
+
+        // Add compiler plugin to classpath (composite build friendly).
+        target.dependencies.add(
+            "kotlinCompilerPluginClasspath",
+            target.rootProject.project(":compiler-plugin:recomposition-tracker:plugin")
+        )
     }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
-        // Not applicable until the compiler plugin is implemented/configured.
-        return false
+        val project = kotlinCompilation.target.project
+        val ext = project.extensions.findByType(RecompositionTrackerExtension::class.java) ?: return false
+        if (!ext.enabled) return false
+
+        if (ext.onlyInDebug) {
+            val android = project.extensions.findByType(BaseExtension::class.java)
+            if (android != null) {
+                val compilationName = kotlinCompilation.name.lowercase()
+                return compilationName.contains("debug")
+            }
+        }
+        return true
     }
 
     override fun getCompilerPluginId(): String = "com.linreal.plugin.recomposition-tracker"
@@ -27,7 +50,14 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
         version = "1.0.0"
     )
 
-    override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> =
-        kotlinCompilation.target.project.provider { emptyList() }
+    override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {
+        val project = kotlinCompilation.target.project
+        val ext = project.extensions.getByType(RecompositionTrackerExtension::class.java)
+        return project.provider {
+            listOf(
+                SubpluginOption(key = "enabled", value = ext.enabled.toString()),
+                SubpluginOption(key = "skipInline", value = ext.skipInline.toString())
+            )
+        }
+    }
 }
-
