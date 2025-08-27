@@ -44,9 +44,9 @@ android {
 }
 
 dependencies {
-    implementation(project(":compiler-plugin:logging-runtime"))
+    implementation(project(":compiler-plugin:logger:runtime"))
     implementation(project(":logging-annotations"))
-    kotlinCompilerPluginClasspath(project(":compiler-plugin:logging-compiler-plugin"))
+    kotlinCompilerPluginClasspath(project(":compiler-plugin:logger:plugin"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

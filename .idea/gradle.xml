@@ -12,10 +12,18 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/compiler-plugin" />
-            <option value="$PROJECT_DIR$/compiler-plugin/logging-compiler-plugin" />
-            <option value="$PROJECT_DIR$/compiler-plugin/logging-runtime" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger/plugin" />
+            <option value="$PROJECT_DIR$/compiler-plugin/logger/runtime" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/plugin" />
+            <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/runtime" />
+            <option value="$PROJECT_DIR$/gradle-plugin" />
+            <option value="$PROJECT_DIR$/gradle-plugin/composite" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/logger" />
+            <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/recomposition-tracker" />
             <option value="$PROJECT_DIR$/logging-annotations" />
-            <option value="$PROJECT_DIR$/logging-gradle-plugin" />
           </set>
         </option>
       </GradleProjectSettings>

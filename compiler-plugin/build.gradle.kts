@@ -1,2 +1,2 @@
-// This is a parent module that contains both logging-compiler-plugin and logging-runtime submodules
+// Parent module aggregating compiler plugin families (e.g., logger, recomposition-tracker)
 // No specific configuration needed at this level
