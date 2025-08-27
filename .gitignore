@@ -16,3 +16,4 @@
 local.properties
 *.local.md
 /cc_tasks
+AGENTS.md

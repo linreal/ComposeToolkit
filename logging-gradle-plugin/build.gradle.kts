@@ -4,10 +4,10 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":logging-compiler-plugin"))
+    implementation(project(":compiler-plugin:logging-compiler-plugin"))
     
     // Gradle plugin development
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.2.10")
+    implementation(libs.kotlin.gradle.plugin.api)
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
     implementation("com.android.tools.build:gradle:8.12.1")
 }

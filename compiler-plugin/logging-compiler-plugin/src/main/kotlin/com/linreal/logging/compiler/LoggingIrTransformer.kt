@@ -42,17 +42,32 @@ class LoggingIrTransformer(
 
     @OptIn(UnsafeDuringIrConstructionAPI::class)
     private val logDSymbol by lazy {
-        val callableId = CallableId(FqName("android.util"), FqName("Log"), Name.identifier("d"))
-        pluginContext
-            .referenceFunctions(callableId)
-            .firstOrNull { symbol ->
-                val fn = symbol.owner
-                val valueParams = fn.parameters.filter { it.kind == IrParameterKind.Regular || it.kind == IrParameterKind.Context }
+        val id = CallableId(
+            packageName = FqName("com.linreal.logging.runtime"),
+            className = FqName("AndroidLog"),
+            callableName = Name.identifier("d")
+        )
+        pluginContext.referenceFunctions(id).firstOrNull { symbol ->
+            val fn = symbol.owner
+            val valueParams = fn.parameters.filter { it.kind == IrParameterKind.Regular || it.kind == IrParameterKind.Context }
+            
+            valueParams.size == 2 &&
+                    valueParams[0].type.isString() &&
+                    valueParams[1].type.isString()
+        }
+    }
 
-                valueParams.size == 2 &&
-                        valueParams[0].type.isString() &&
-                        valueParams[1].type.isString()
-            }
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
+    private val logd2 by lazy {
+        val id = CallableId(FqName("com.linreal.logging.runtime"), Name.identifier("logd"))
+        pluginContext.referenceFunctions(id).firstOrNull { symbol ->
+            val fn = symbol.owner
+            val valueParams = fn.parameters.filter { it.kind == IrParameterKind.Regular || it.kind == IrParameterKind.Context }
+
+            valueParams.size == 2 &&
+                    valueParams[0].type.isString() &&
+                    valueParams[1].type.isString()
+        }
     }
 
     @OptIn(DeprecatedForRemovalCompilerApi::class)
@@ -66,12 +81,15 @@ class LoggingIrTransformer(
 
         val className = getClassName(declaration)
         val functionName = declaration.name.asString()
-        val logD = logDSymbol
+        val logD = logd2
         if (logD == null) {
-            // If android.util.Log isn't on classpath, fail gracefully.
-            println("[LoggingPlugin] WARNING: android.util.Log.d not found; skip $className.$functionName")
+            // If AndroidLog isn't on classpath, fail gracefully.
+            println("[LoggingPlugin] WARNING: AndroidLog.d not found; skip $className.$functionName")
             return super.visitFunction(declaration)
         }
+        
+        println("[LoggingPlugin] Found AndroidLog.d symbol: ${logD.owner}")
+        println("[LoggingPlugin] Parameters: ${logD.owner.valueParameters.map { "${it.name}: ${it.type}" }}")
 
         val builder = DeclarationIrBuilder(pluginContext, declaration.symbol)
 

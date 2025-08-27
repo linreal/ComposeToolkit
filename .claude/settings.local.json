@@ -4,7 +4,8 @@
       "Bash(mkdir:*)",
       "Bash(./gradlew:*)",
       "Bash(jar:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
