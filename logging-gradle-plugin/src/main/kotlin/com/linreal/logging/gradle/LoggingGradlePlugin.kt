@@ -9,13 +9,23 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 @Suppress("unused") // Used via reflection.
+/**
+ * Gradle-side glue that wires the Kotlin compiler plugin into a project.
+ *
+ * Responsibilities:
+ * - Exposes a `logging { ... }` extension so users can configure behavior.
+ * - Adds the compiler plugin artifact to the Kotlin compiler classpath.
+ * - Decides whether the plugin applies to a given Kotlin compilation.
+ * - Passes configuration as `SubpluginOption`s to the compiler.
+ */
 class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
     
     override fun apply(target: Project) {
+        // Create the user-facing extension: project.logging { ... }
         println("[LoggingGradlePlugin] Applied to project: ${target.name}")
         target.extensions.create("logging", LoggingExtension::class.java)
         
-        // Add compiler plugin to classpath for composite build
+        // Add compiler plugin to classpath (composite build friendly).
         target.dependencies.add(
             "kotlinCompilerPluginClasspath",
             target.rootProject.project(":logging-compiler-plugin")
@@ -32,7 +42,7 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
             
         if (!extension.enabled) return false
         
-        // Check if this is a debug build when onlyInDebug is true
+        // Apply only to debug variants when requested and Android plugin is present.
         if (extension.onlyInDebug) {
             val android = project.extensions.findByType(BaseExtension::class.java)
             if (android != null) {
@@ -48,8 +58,13 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
         return true
     }
 
+    /** The compiler-side plugin id. Must match registrar's `PLUGIN_ID`. */
     override fun getCompilerPluginId(): String = "com.linreal.plugin.logging"
 
+    /**
+     * Points Gradle to the compiler plugin artifact. In composite builds this
+     * resolves to the included build module `:logging-compiler-plugin`.
+     */
     override fun getPluginArtifact(): SubpluginArtifact {
         // For composite build/local development
         return SubpluginArtifact(
@@ -65,6 +80,7 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
         val project = kotlinCompilation.target.project
         val extension = project.extensions.getByType(LoggingExtension::class.java)
         
+        // Map extension values into options the compiler plugin understands.
         return project.provider {
             listOf(
                 SubpluginOption(key = "enabled", value = extension.enabled.toString()),

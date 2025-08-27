@@ -7,6 +7,13 @@ import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 
 @OptIn(ExperimentalCompilerApi::class)
+/**
+ * Maps Gradle subplugin options to compiler configuration.
+ *
+ * Gradle sends key/value options (see LoggingGradlePlugin) and the compiler
+ * reads them here, storing into [CompilerConfiguration] using keys defined in
+ * [LoggingCompilerPluginRegistrar].
+ */
 class LoggingCommandLineProcessor : CommandLineProcessor {
     
     companion object {
@@ -42,6 +49,7 @@ class LoggingCommandLineProcessor : CommandLineProcessor {
         value: String,
         configuration: CompilerConfiguration
     ) {
+        // Store values into the compiler configuration used later by the registrar.
         return when (option) {
             ARG_ENABLED -> configuration.put(LoggingCompilerPluginRegistrar.KEY_ENABLED, value.toBoolean())
             ARG_SKIP_INLINE -> configuration.put(LoggingCompilerPluginRegistrar.KEY_SKIP_INLINE, value.toBoolean())

@@ -11,6 +11,14 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 @OptIn(ExperimentalCompilerApi::class)
+/**
+ * Entry point for the Kotlin compiler (K2) to discover and register our IR extension.
+ *
+ * - `supportsK2 = true` declares K2 compatibility.
+ * - Reads configuration passed from Gradle.
+ * - Registers [LoggingIrGenerationExtension] when enabled.
+ * - Emits diagnostic messages via [MessageCollector] to help debugging.
+ */
 class LoggingCompilerPluginRegistrar : CompilerPluginRegistrar() {
     
     override val supportsK2: Boolean = true
@@ -38,7 +46,9 @@ class LoggingCompilerPluginRegistrar : CompilerPluginRegistrar() {
     companion object {
         const val PLUGIN_ID = "com.linreal.plugin.logging"
         
+        /** Compiler configuration key toggling the plugin. */
         val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
+        /** Compiler configuration key to skip inline functions. */
         val KEY_SKIP_INLINE = CompilerConfigurationKey<Boolean>("skipInline")
     }
 }

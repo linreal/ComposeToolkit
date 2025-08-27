@@ -8,7 +8,10 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 class LoggingIrGenerationExtension(
     private val skipInline: Boolean
 ) : IrGenerationExtension {
-    
+    /**
+     * Called by the compiler for each module. We traverse the IR tree and
+     * transform functions annotated with `@Logging` using [LoggingIrTransformer].
+     */
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         println("[LoggingIrGenerationExtension] generate called for module: ${moduleFragment.name}")
         moduleFragment.transformChildrenVoid(
