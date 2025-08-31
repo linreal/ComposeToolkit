@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 open class RecompositionTrackerExtension {
     var enabled: Boolean = true
@@ -25,6 +26,28 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
             "kotlinCompilerPluginClasspath",
             target.rootProject.project(":compiler-plugin:recomposition-tracker:plugin")
         )
+        
+        // Add runtime dependency based on project type
+        addRuntimeDependency(target)
+    }
+    
+    private fun addRuntimeDependency(project: Project) {
+        project.afterEvaluate {
+            val kmpExtension = project.extensions.findByType(KotlinMultiplatformExtension::class.java)
+            if (kmpExtension != null) {
+                // Multiplatform project - add to androidMain since RecomposeTracker is Android-only for now
+                project.dependencies.add(
+                    "androidMainImplementation",
+                    project.rootProject.project(":compiler-plugin:recomposition-tracker:runtime")
+                )
+            } else {
+                // Regular Android/JVM project
+                project.dependencies.add(
+                    "implementation",
+                    project.rootProject.project(":compiler-plugin:recomposition-tracker:runtime")
+                )
+            }
+        }
     }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {

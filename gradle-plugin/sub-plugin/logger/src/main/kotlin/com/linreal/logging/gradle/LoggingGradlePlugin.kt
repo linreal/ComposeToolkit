@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 @Suppress("unused") // Used via reflection.
 class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
@@ -21,6 +22,28 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
             "kotlinCompilerPluginClasspath",
             target.rootProject.project(":compiler-plugin:logger:plugin")
         )
+        
+        // Add runtime dependency based on project type
+        addRuntimeDependency(target)
+    }
+    
+    private fun addRuntimeDependency(project: Project) {
+        project.afterEvaluate {
+            val kmpExtension = project.extensions.findByType(KotlinMultiplatformExtension::class.java)
+            if (kmpExtension != null) {
+                // Multiplatform project - add to appropriate source sets
+                project.dependencies.add(
+                    "commonMainImplementation",
+                    project.rootProject.project(":compiler-plugin:logger:runtime")
+                )
+            } else {
+                // Regular Android/JVM project
+                project.dependencies.add(
+                    "implementation",
+                    project.rootProject.project(":compiler-plugin:logger:runtime")
+                )
+            }
+        }
     }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {

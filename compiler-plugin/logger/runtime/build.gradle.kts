@@ -1,6 +1,36 @@
 plugins {
+    id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+}
+
+kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+    
+    jvm()
+    
+    sourceSets {
+        commonMain {
+            dependencies {
+                // No external dependencies needed
+            }
+        }
+        
+        androidMain {
+            dependencies {
+                // Android-specific dependencies if needed
+            }
+        }
+        
+        jvmMain {
+            dependencies {
+                // JVM-specific dependencies if needed
+            }
+        }
+    }
 }
 
 android {
@@ -9,8 +39,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -27,12 +55,5 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
-
-dependencies {
-    // No external dependencies - just uses Android's built-in logging
 }
 

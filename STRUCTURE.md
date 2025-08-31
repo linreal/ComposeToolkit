@@ -42,10 +42,15 @@ logger/
 |       |-- LoggingCompilerPluginRegistrar.kt
 |       |-- LoggingIrGenerationExtension.kt
 |       `-- LoggingIrTransformer.kt
-`-- runtime/                   # Runtime library
-    |-- build.gradle.kts
-    `-- src/main/kotlin/com/linreal/logging/runtime/
-        `-- AndroidLog.kt
+`-- runtime/                   # Multiplatform runtime library
+    |-- build.gradle.kts       # KMP configuration
+    `-- src/
+        |-- commonMain/kotlin/com/linreal/logging/runtime/
+        |   `-- Logger.kt      # expect/actual logging interface
+        |-- androidMain/kotlin/com/linreal/logging/runtime/
+        |   `-- AndroidLog.kt  # Android implementation using android.util.Log
+        `-- jvmMain/kotlin/com/linreal/logging/runtime/
+            `-- JvmLog.kt      # JVM implementation using println
 ```
 
 #### Recomposition Tracker Plugin (`/compiler-plugin/recomposition-tracker`)
@@ -58,11 +63,13 @@ recomposition-tracker/
 |       |-- RecompositionTrackerCompilerPluginRegistrar.kt
 |       |-- RecompositionTrackerIrGenerationExtension.kt
 |       `-- RecompositionTrackerIrTransformer.kt
-`-- runtime/                   # Runtime library
-    |-- build.gradle.kts
-    `-- src/main/kotlin/com/linreal/retracker/
-        |-- RecompositionTracker.kt
-        `-- TrackRecompositions.kt
+`-- runtime/                   # Multiplatform runtime library
+    |-- build.gradle.kts       # KMP configuration
+    `-- src/
+        |-- commonMain/kotlin/com/linreal/retracker/
+        |   `-- TrackRecompositions.kt  # Annotation definition
+        `-- androidMain/kotlin/com/linreal/retracker/
+            `-- RecompositionTracker.kt # Android Compose implementation
 ```
 
 ### 3. Gradle Plugins (`/gradle-plugin`)

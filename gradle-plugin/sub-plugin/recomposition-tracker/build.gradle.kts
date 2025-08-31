@@ -8,6 +8,7 @@ dependencies {
     // Gradle plugin development only.
     implementation(libs.kotlin.gradle.plugin.api)
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
+    implementation("com.android.tools.build:gradle:8.12.1")
 }
 
 gradlePlugin {

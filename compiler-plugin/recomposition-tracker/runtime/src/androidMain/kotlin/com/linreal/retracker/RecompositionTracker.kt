@@ -1,12 +1,9 @@
 package com.linreal.retracker
-
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NoLiveLiterals
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-
 
 @NoLiveLiterals
 @Suppress("NOTHING_TO_INLINE")
@@ -16,7 +13,7 @@ inline fun RecomposeTracker(
     arguments: Map<String, Any?>
 ) {
     LaunchedEffect(null) {
-        Log.e("RecomposeLogger", "Begin tracking, $name, ${arguments.map { "${it.key} : ${it.value}" }}")
+        logInfo("RecomposeLogger", "Begin tracking, $name, ${arguments.map { "${it.key} : ${it.value}" }}")
     }
 
     val ref = remember { Ref(0) }
@@ -35,11 +32,11 @@ inline fun RecomposeTracker(
         }
     }
 
-    val isEnabled = true //RecomposeLoggerConfig.isEnabled
+    val isEnabled = true
     if (isEnabled) {
-        Log.d("RecomposeLogger", "$name recomposed ${ref.count} times.")
+        logDebug("RecomposeLogger", "$name recomposed ${ref.count} times.")
         if (recomposeLog.isNotEmpty()) {
-            Log.d("RecomposeLogger", "Changes:${recomposeLog}\n")
+            logDebug("RecomposeLogger", "Changes:${recomposeLog}\n")
         }
     }
 }

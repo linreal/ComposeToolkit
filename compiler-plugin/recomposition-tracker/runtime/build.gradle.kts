@@ -1,7 +1,30 @@
 plugins {
+    id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    // Kotlin Compose compiler plugin
     alias(libs.plugins.kotlin.compose)
+    // Compose Multiplatform plugin (prep for common Compose UI if needed)
+    alias(libs.plugins.compose)
+}
+
+kotlin {
+    androidTarget()
+    // Optional JVM target so common code can be resolved in non-Android builds
+    jvm()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":compiler-plugin:logger:runtime"))
+            }
+        }
+
+        androidMain {
+            dependencies {
+                implementation(libs.compose.runtime)
+            }
+        }
+    }
 }
 
 android {
@@ -10,7 +33,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -30,12 +52,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
-
-dependencies {
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.runtime)
 }
