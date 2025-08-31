@@ -16,14 +16,12 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":compiler-plugin:logger:runtime"))
+                // Compose runtime for Multiplatform (common)
+                implementation(libs.jb.compose.runtime)
             }
         }
 
-        androidMain {
-            dependencies {
-                implementation(libs.compose.runtime)
-            }
-        }
+        androidMain {}
     }
 }
 

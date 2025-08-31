@@ -1,4 +1,5 @@
 package com.linreal.retracker
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NoLiveLiterals
@@ -57,3 +58,4 @@ class DataDiffHolder(current: Any?) {
 }
 
 data class Ref(var count: Int = 0)
+

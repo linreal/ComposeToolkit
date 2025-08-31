@@ -67,9 +67,10 @@ recomposition-tracker/
     |-- build.gradle.kts       # KMP configuration
     `-- src/
         |-- commonMain/kotlin/com/linreal/retracker/
-        |   `-- TrackRecompositions.kt  # Annotation definition
+        |   |-- TrackRecompositions.kt  # Annotation definition
+        |   `-- RecompositionTracker.kt # Common Compose implementation
         `-- androidMain/kotlin/com/linreal/retracker/
-            `-- RecompositionTracker.kt # Android Compose implementation
+            `-- (platform-specific additions if needed)
 ```
 
 ### 3. Gradle Plugins (`/gradle-plugin`)

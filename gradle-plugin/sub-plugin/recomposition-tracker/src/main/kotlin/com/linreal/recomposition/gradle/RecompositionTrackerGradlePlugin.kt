@@ -35,9 +35,9 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
         project.afterEvaluate {
             val kmpExtension = project.extensions.findByType(KotlinMultiplatformExtension::class.java)
             if (kmpExtension != null) {
-                // Multiplatform project - add to androidMain since RecomposeTracker is Android-only for now
+                // Multiplatform project - RecomposeTracker is now commonMain
                 project.dependencies.add(
-                    "androidMainImplementation",
+                    "commonMainImplementation",
                     project.rootProject.project(":compiler-plugin:recomposition-tracker:runtime")
                 )
             } else {
