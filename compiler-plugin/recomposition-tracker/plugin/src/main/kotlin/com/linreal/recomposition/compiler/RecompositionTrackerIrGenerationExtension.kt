@@ -10,8 +10,7 @@ class RecompositionTrackerIrGenerationExtension(
 ) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         moduleFragment.transformChildrenVoid(
-            RecompositionTrackerIrTransformer()
+            RecompositionTrackerIrTransformer(pluginContext, skipInline)
         )
     }
 }
-
