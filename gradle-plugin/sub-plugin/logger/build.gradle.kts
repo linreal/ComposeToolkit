@@ -15,8 +15,8 @@ dependencies {
 gradlePlugin {
     plugins {
         create("loggerSubPlugin") {
-            id = "com.linreal.logger"
-            implementationClass = "com.linreal.logging.gradle.LoggingGradlePlugin"
+            id = "io.github.linreal.logger"
+            implementationClass = "io.github.linreal.logging.gradle.LoggingGradlePlugin"
             version = "1.0.0"
             displayName = "Logger Sub-Plugin"
             description = "Gradle wiring for the logger compiler plugin (@Logging)"

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.linreal.composetoolkit"
+    namespace = "io.github.linreal.composetoolkit"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.linreal.composetoolkit"
+        applicationId = "io.github.linreal.composetoolkit"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -35,10 +35,10 @@ android {
         jvmTarget = "11"
         // Temporary direct wiring while composite plugin remains local-only
         freeCompilerArgs += listOf(
-            "-P", "plugin:com.linreal.plugin.logging:enabled=true",
-            "-P", "plugin:com.linreal.plugin.logging:skipInline=true",
-            "-P", "plugin:com.linreal.plugin.recomposition-tracker:enabled=true",
-            "-P", "plugin:com.linreal.plugin.recomposition-tracker:skipInline=true",
+            "-P", "plugin:io.github.linreal.plugin.logging:enabled=true",
+            "-P", "plugin:io.github.linreal.plugin.logging:skipInline=true",
+            "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:enabled=true",
+            "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:skipInline=true",
         )
     }
     buildFeatures {

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.linreal.recomposition.runtime"
+    namespace = "io.github.linreal.recomposition.runtime"
     compileSdk = 34
 
     defaultConfig {

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.linreal.logging.runtime"
+    namespace = "io.github.linreal.logging.runtime"
     compileSdk = 34
 
     defaultConfig {
