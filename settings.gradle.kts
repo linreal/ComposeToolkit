@@ -28,5 +28,5 @@ include(":compiler-plugin:recomposition-tracker:plugin")
 include(":compiler-plugin:recomposition-tracker:runtime")
 include(":gradle-plugin:sub-plugin:logger")
 include(":gradle-plugin:sub-plugin:recomposition-tracker")
-include(":gradle-plugin:composite")
+include(":gradle-plugin:toolkit")
  

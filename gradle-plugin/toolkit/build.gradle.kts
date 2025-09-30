@@ -12,7 +12,7 @@ gradlePlugin {
     plugins {
         create("composeToolkitPlugin") {
             id = "io.github.linreal.compose-toolkit"
-            implementationClass = "io.github.linreal.composite.ComposeToolkitGradlePlugin"
+            implementationClass = "io.github.linreal.toolkit.ComposeToolkitGradlePlugin"
             version = "1.0.0"
             displayName = "Compose Toolkit"
             description = "Aggregates Compose Toolkit sub-plugins"

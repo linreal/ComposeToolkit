@@ -1,10 +1,10 @@
-package io.github.linreal.composite
+package io.github.linreal.toolkit
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Composite Gradle plugin that aggregates individual sub-plugins, so users can
+ * Main Gradle plugin that aggregates individual sub-plugins, so users can
  * apply a single plugin id: `io.github.linreal.compose-toolkit`.
  */
 class ComposeToolkitGradlePlugin : Plugin<Project> {

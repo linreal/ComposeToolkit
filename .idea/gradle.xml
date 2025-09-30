@@ -19,10 +19,10 @@
             <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/plugin" />
             <option value="$PROJECT_DIR$/compiler-plugin/recomposition-tracker/runtime" />
             <option value="$PROJECT_DIR$/gradle-plugin" />
-            <option value="$PROJECT_DIR$/gradle-plugin/composite" />
             <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin" />
             <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/logger" />
             <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/recomposition-tracker" />
+            <option value="$PROJECT_DIR$/gradle-plugin/toolkit" />
             <option value="$PROJECT_DIR$/logging-annotations" />
           </set>
         </option>
