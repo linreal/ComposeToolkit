@@ -16,16 +16,30 @@ open class RecompositionTrackerExtension {
 
 @Suppress("unused") // Used via reflection.
 class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
+
+    companion object {
+        private const val PLUGIN_GROUP = "io.github.linreal"
+        private const val PLUGIN_ARTIFACT = "recomposition-tracker-compiler-plugin"
+        private const val PLUGIN_VERSION = "0.1.3-SNAPSHOT"
+        private const val RUNTIME_ARTIFACT = "recomposition-tracker-runtime"
+    }
     override fun apply(target: Project) {
         println("[RecompositionTrackerGradlePlugin] Applied to project: ${target.name}")
         target.extensions.create("recompositionTracker", RecompositionTrackerExtension::class.java)
 
-        // Add compiler plugin to classpath (composite build friendly).
+        // Add compiler plugin to classpath using published coordinates
         target.dependencies.add(
             "kotlinCompilerPluginClasspath",
-            target.rootProject.project(":compiler-plugin:recomposition-tracker:plugin")
+            "$PLUGIN_GROUP:$PLUGIN_ARTIFACT:$PLUGIN_VERSION"
+        )
+
+        // Add runtime library to implementation classpath
+        target.dependencies.add(
+            "implementation",
+            "$PLUGIN_GROUP:$RUNTIME_ARTIFACT:$PLUGIN_VERSION"
         )
     }
+
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
         val project = kotlinCompilation.target.project
@@ -45,9 +59,9 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun getCompilerPluginId(): String = "io.github.linreal.plugin.recomposition-tracker"
 
     override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
-        groupId = "io.github.linreal",
-        artifactId = "recomposition-tracker-compiler-plugin",
-        version = "1.0.0"
+        groupId = PLUGIN_GROUP,
+        artifactId = PLUGIN_ARTIFACT,
+        version = PLUGIN_VERSION
     )
 
     override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {

@@ -10,18 +10,32 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 @Suppress("unused") // Used via reflection.
 class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
+
+    companion object {
+        private const val PLUGIN_GROUP = "io.github.linreal"
+        private const val PLUGIN_ARTIFACT = "logger-compiler-plugin"
+        private const val PLUGIN_VERSION = "0.1.3-SNAPSHOT"
+        private const val ANNOTATIONS_ARTIFACT = "logging-annotations"
+    }
     
     override fun apply(target: Project) {
         // Create the user-facing extension: project.logging { ... }
         println("[LoggingGradlePlugin] Applied to project: ${target.name}")
         target.extensions.create("logging", LoggingExtension::class.java)
-        
-        // Add compiler plugin to classpath (composite build friendly).
+
+        // Add compiler plugin to classpath using published coordinates
         target.dependencies.add(
             "kotlinCompilerPluginClasspath",
-            target.rootProject.project(":compiler-plugin:logger:plugin")
+            "$PLUGIN_GROUP:$PLUGIN_ARTIFACT:$PLUGIN_VERSION"
+        )
+
+        // Add runtime annotations to implementation classpath
+        target.dependencies.add(
+            "implementation",
+            "$PLUGIN_GROUP:$ANNOTATIONS_ARTIFACT:$PLUGIN_VERSION"
         )
     }
+
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
         val project = kotlinCompilation.target.project
@@ -58,9 +72,9 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
      */
     override fun getPluginArtifact(): SubpluginArtifact {
         return SubpluginArtifact(
-            groupId = "io.github.linreal",
-            artifactId = "logging-compiler-plugin",
-            version = "1.0.0"
+            groupId = PLUGIN_GROUP,
+            artifactId = PLUGIN_ARTIFACT,
+            version = PLUGIN_VERSION
         )
     }
 

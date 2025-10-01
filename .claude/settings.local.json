@@ -5,7 +5,10 @@
       "Bash(./gradlew:*)",
       "Bash(jar:*)",
       "Bash(cat:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vanniktech.github.io)"
     ],
     "deny": [],
     "ask": []

@@ -21,7 +21,7 @@ app/
 |-- build.gradle.kts            # Android app build config
 |-- src/main/
 |   |-- AndroidManifest.xml
-|   |-- java/com/linreal/composetoolkit/
+|   |-- java/io/github/linreal/composetoolkit/
 |   |   |-- MainActivity.kt     # Main activity
 |   |   `-- ui/theme/          # Compose theme setup
 |   `-- res/                   # Android resources
@@ -37,14 +37,14 @@ Two main compiler plugins, each with plugin + runtime structure:
 logger/
 |-- plugin/                    # Kotlin compiler plugin
 |   |-- build.gradle.kts
-|   `-- src/main/kotlin/com/linreal/logging/compiler/
+|   `-- src/main/kotlin/io/github/linreal/logging/compiler/
 |       |-- LoggingCommandLineProcessor.kt
 |       |-- LoggingCompilerPluginRegistrar.kt
 |       |-- LoggingIrGenerationExtension.kt
 |       `-- LoggingIrTransformer.kt
 `-- runtime/                   # Runtime library
     |-- build.gradle.kts
-    `-- src/main/kotlin/com/linreal/logging/runtime/
+    `-- src/main/kotlin/io/github/linreal/logging/runtime/
         `-- AndroidLog.kt
 ```
 
@@ -53,14 +53,14 @@ logger/
 recomposition-tracker/
 |-- plugin/                    # Kotlin compiler plugin
 |   |-- build.gradle.kts
-|   `-- src/main/kotlin/com/linreal/recomposition/compiler/
+|   `-- src/main/kotlin/io/github/linreal/recomposition/compiler/
 |       |-- RecompositionTrackerCommandLineProcessor.kt
 |       |-- RecompositionTrackerCompilerPluginRegistrar.kt
 |       |-- RecompositionTrackerIrGenerationExtension.kt
 |       `-- RecompositionTrackerIrTransformer.kt
 `-- runtime/                   # Runtime library
     |-- build.gradle.kts
-    `-- src/main/kotlin/com/linreal/retracker/
+    `-- src/main/kotlin/io/github/linreal/retracker/
         |-- RecompositionTracker.kt
         `-- TrackRecompositions.kt
 ```
@@ -68,19 +68,19 @@ recomposition-tracker/
 ### 3. Gradle Plugins (`/gradle-plugin`)
 ```
 gradle-plugin/
-|-- composite/                 # Main user-facing plugin
+|-- toolkit/                   # Main user-facing plugin
 |   |-- build.gradle.kts
-|   `-- src/main/kotlin/com/linreal/composite/
+|   `-- src/main/kotlin/io/github/linreal/toolkit/
 |       `-- ComposeToolkitGradlePlugin.kt  # Applies all sub-plugins
 `-- sub-plugin/               # Individual feature plugins
     |-- logger/
     |   |-- build.gradle.kts
-    |   `-- src/main/kotlin/com/linreal/logging/gradle/
+    |   `-- src/main/kotlin/io/github/linreal/logging/gradle/
     |       |-- LoggingExtension.kt
     |       `-- LoggingGradlePlugin.kt
     `-- recomposition-tracker/
         |-- build.gradle.kts
-        `-- src/main/kotlin/com/linreal/recomposition/gradle/
+        `-- src/main/kotlin/io/github/linreal/recomposition/gradle/
             `-- RecompositionTrackerGradlePlugin.kt
 ```
 
@@ -88,7 +88,7 @@ gradle-plugin/
 ```
 logging-annotations/
 |-- build.gradle.kts
-`-- src/main/kotlin/com/linreal/logging/
+`-- src/main/kotlin/io/github/linreal/logging/
     `-- Logging.kt             # Annotation definitions
 ```
 
