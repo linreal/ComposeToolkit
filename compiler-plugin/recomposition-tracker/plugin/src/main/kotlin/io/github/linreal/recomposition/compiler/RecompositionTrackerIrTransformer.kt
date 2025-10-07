@@ -3,6 +3,8 @@ package io.github.linreal.recomposition.compiler
 import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.serialization.kind
+import org.jetbrains.kotlin.backend.konan.KonanFqNames.function
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
@@ -13,6 +15,7 @@ import org.jetbrains.kotlin.ir.builders.irAs
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
@@ -40,13 +43,13 @@ class RecompositionTrackerIrTransformer(
 
     @OptIn(UnsafeDuringIrConstructionAPI::class)
     private val recomposeTrackerSymbol by lazy {
-        val id = CallableId(FqName("io.github.linreal.retracker"), Name.identifier("RecomposeTracker"))
-        pluginContext.referenceFunctions(id).firstOrNull { it.owner.valueParameters.size == 2 }
+        val id =
+            CallableId(FqName("io.github.linreal.retracker"), Name.identifier("RecomposeTracker"))
+        pluginContext.referenceFunctions(id).firstOrNull { it.owner.valueParams.size == 2 }
     }
 
     override fun visitFunction(declaration: IrFunction): IrStatement {
         declaration.transformChildrenVoid(this)
-
         // Only process real functions with bodies
         val body = declaration.body ?: return declaration
         if (skipInline && declaration.isInline) return declaration
@@ -57,16 +60,20 @@ class RecompositionTrackerIrTransformer(
 
         val builder = DeclarationIrBuilder(pluginContext, declaration.symbol)
 
+        val trackerOwner = trackerSymbol.owner
         val trackerCall = builder.irCall(trackerSymbol).apply {
             val name = declaration.fqNameWhenAvailable?.asString() ?: declaration.name.asString()
-            putValueArgument(0, builder.irString(name))
-            putValueArgument(1, buildArgumentsMap(builder, declaration))
+            val nameParam = trackerOwner.valueParams[0]
+            val argsParam = trackerOwner.valueParams[1]
+            arguments[nameParam.indexInParameters] = builder.irString(name)
+            arguments[argsParam.indexInParameters] = buildArgumentsMap(builder, declaration)
         }
 
         when (body) {
             is IrBlockBody -> {
                 body.statements.add(0, trackerCall)
             }
+
             is IrExpressionBody -> {
                 val expr = body.expression
                 declaration.body = builder.irBlockBody {
@@ -74,7 +81,9 @@ class RecompositionTrackerIrTransformer(
                     +expr
                 }
             }
-            else -> { /* no-op */ }
+
+            else -> { /* no-op */
+            }
         }
         return declaration
     }
@@ -88,7 +97,7 @@ class RecompositionTrackerIrTransformer(
 
         val mutableMapOf = pluginContext.referenceFunctions(
             CallableId(FqName("kotlin.collections"), Name.identifier("mutableMapOf"))
-        ).firstOrNull { it.owner.valueParameters.isEmpty() }
+        ).firstOrNull { it.owner.valueParams.isEmpty() }
 
         val emptyMapSymbol = pluginContext.referenceFunctions(
             CallableId(FqName("kotlin.collections"), Name.identifier("emptyMap"))
@@ -96,26 +105,28 @@ class RecompositionTrackerIrTransformer(
 
         if (mutableMapOf == null) {
             return@with irCall(emptyMapSymbol).apply {
-                putTypeArgument(0, stringType)
-                putTypeArgument(1, anyNType)
+                typeArguments[0] = stringType
+                typeArguments[1] = anyNType
             }
         }
 
         irBlock {
             val tmp = irTemporary(irCall(mutableMapOf).apply {
-                putTypeArgument(0, stringType)
-                putTypeArgument(1, anyNType)
+                typeArguments[0] = stringType
+                typeArguments[1] = anyNType
             }, nameHint = "args")
 
             val mutMapClass = pluginContext.irBuiltIns.mutableMapClass
             val putSymbol = (mutMapClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
-                .first { it.name.asString() == "put" && it.valueParameters.size == 2 }).symbol
-
-            function.valueParameters.forEach { param ->
+                .first { it.name.asString() == "put" && it.valueParams.size == 2 }).symbol
+            val putOwner = putSymbol.owner
+            val keyParam = putOwner.valueParams[0]
+            val valueParam = putOwner.valueParams[1]
+            function.valueParams.forEach { param ->
                 +irCall(putSymbol).apply {
                     dispatchReceiver = irGet(tmp)
-                    putValueArgument(0, irString(param.name.asString()))
-                    putValueArgument(1, irAs(irGet(param), anyNType))
+                    arguments[keyParam.indexInParameters] = irString(param.name.asString())
+                    arguments[valueParam.indexInParameters] = irAs(irGet(param), anyNType)
                 }
             }
 
@@ -123,3 +134,6 @@ class RecompositionTrackerIrTransformer(
         }
     }
 }
+
+private val IrFunction.valueParams
+    get() = this.parameters.filter { it.kind == IrParameterKind.Regular || it.kind == IrParameterKind.Context }
