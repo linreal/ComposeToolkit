@@ -9,8 +9,8 @@ class RecompositionTrackerIrGenerationExtension(
     private val skipInline: Boolean
 ) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
-        moduleFragment.transformChildrenVoid(
-            RecompositionTrackerIrTransformer(pluginContext, skipInline)
-        )
+        val transformer = RecompositionTrackerIrTransformer(pluginContext, skipInline)
+        moduleFragment.transformChildrenVoid(transformer)
+        transformer.finish()
     }
 }

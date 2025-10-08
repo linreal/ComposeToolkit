@@ -5,8 +5,11 @@ package io.github.linreal.retracker
  *
  * When present, the compiler plugin injects a call to `RecomposeTracker`
  * at the start of the composable to log recomposition count and argument diffs.
+ *
+ * @param includeNested If true, also tracks all nested @Composable functions
+ *                      recursively within this function. Default is false.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class TrackRecompositions
+annotation class TrackRecompositions(val includeNested: Boolean = false)
 
