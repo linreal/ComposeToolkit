@@ -32,7 +32,7 @@ import org.jetbrains.kotlin.name.Name
  * IR transformer that injects a call to `RecomposeTracker` at the start of
  * Composable functions annotated with `@TrackRecompositions`.
  */
-@OptIn(DeprecatedForRemovalCompilerApi::class, UnsafeDuringIrConstructionAPI::class)
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 class RecompositionTrackerIrTransformer(
     private val pluginContext: IrPluginContext,
     private val skipInline: Boolean
