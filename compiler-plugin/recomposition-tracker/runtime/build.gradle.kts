@@ -1,8 +1,36 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
+    id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.maven.publish)
+}
+
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+        compilations.all {
+            compilerOptions.configure {
+                jvmTarget.set(JvmTarget.JVM_17)
+            }
+        }
+    }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.compose.runtime.mpp)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.compose.runtime)
+            }
+        }
+    }
 }
 
 android {
@@ -10,8 +38,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        minSdk = 23
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -31,14 +58,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
-
-dependencies {
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.runtime)
 }
 
 mavenPublishing {

@@ -12,4 +12,3 @@ package io.github.linreal.retracker
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class TrackRecompositions(val includeNested: Boolean = false)
-

@@ -58,11 +58,17 @@ recomposition-tracker/
 |       |-- RecompositionTrackerCompilerPluginRegistrar.kt
 |       |-- RecompositionTrackerIrGenerationExtension.kt
 |       `-- RecompositionTrackerIrTransformer.kt
-`-- runtime/                   # Runtime library
+`-- runtime/                   # Multiplatform runtime library
     |-- build.gradle.kts
-    `-- src/main/kotlin/io/github/linreal/retracker/
-        |-- RecompositionTracker.kt
-        `-- TrackRecompositions.kt
+    `-- src/
+        |-- commonMain/kotlin/io/github/linreal/retracker/
+        |   |-- Logger.kt
+        |   |-- RecompositionTracker.kt
+        |   `-- TrackRecompositions.kt
+        |-- androidMain/kotlin/io/github/linreal/retracker/
+        |   `-- Logger.android.kt
+        `-- iosMain/kotlin/io/github/linreal/retracker/
+            `-- Logger.ios.kt
 ```
 
 ### 3. Gradle Plugins (`/gradle-plugin`)

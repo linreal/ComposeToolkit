@@ -3,6 +3,7 @@ package io.github.linreal.recomposition.gradle
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import java.util.concurrent.atomic.AtomicBoolean
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
@@ -20,12 +21,15 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     companion object {
         private const val PLUGIN_GROUP = "io.github.linreal"
         private const val PLUGIN_ARTIFACT = "recomposition-tracker-compiler-plugin"
-        private const val PLUGIN_VERSION = "0.1.3-SNAPSHOT"
+        private const val PLUGIN_VERSION = "0.1.4-SNAPSHOT"
         private const val RUNTIME_ARTIFACT = "recomposition-tracker-runtime"
     }
     override fun apply(target: Project) {
         println("[RecompositionTrackerGradlePlugin] Applied to project: ${target.name}")
         target.extensions.create("recompositionTracker", RecompositionTrackerExtension::class.java)
+
+        val runtimeDependency = "$PLUGIN_GROUP:$RUNTIME_ARTIFACT:$PLUGIN_VERSION"
+        val runtimeAddedToMultiplatform = AtomicBoolean(false)
 
         // Add compiler plugin to classpath using published coordinates
         target.dependencies.add(
@@ -33,11 +37,17 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
             "$PLUGIN_GROUP:$PLUGIN_ARTIFACT:$PLUGIN_VERSION"
         )
 
-        // Add runtime library to implementation classpath
-        target.dependencies.add(
-            "implementation",
-            "$PLUGIN_GROUP:$RUNTIME_ARTIFACT:$PLUGIN_VERSION"
-        )
+        target.configurations.matching { it.name == "commonMainImplementation" }
+            .all {
+                target.dependencies.add(it.name, runtimeDependency)
+                runtimeAddedToMultiplatform.set(true)
+            }
+
+        target.afterEvaluate {
+            if (!runtimeAddedToMultiplatform.get()) {
+                target.dependencies.add("implementation", runtimeDependency)
+            }
+        }
     }
 
 

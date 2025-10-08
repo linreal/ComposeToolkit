@@ -1,12 +1,13 @@
 package io.github.linreal.retracker
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NoLiveLiterals
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 
+@PublishedApi
+internal const val LOGGER_TAG: String = "RecomposeLogger"
 
 @NoLiveLiterals
 @Suppress("NOTHING_TO_INLINE")
@@ -15,8 +16,9 @@ inline fun RecomposeTracker(
     name: String,
     arguments: Map<String, Any?>
 ) {
-    LaunchedEffect(null) {
-        Log.e("RecomposeLogger", "Begin tracking, $name, ${arguments.map { "${it.key} : ${it.value}" }}")
+    LaunchedEffect(Unit) {
+        val renderedArgs = arguments.entries.joinToString { "${it.key} : ${it.value}" }
+        logError(LOGGER_TAG, "Begin tracking, $name, $renderedArgs")
     }
 
     val ref = remember { Ref(0) }
@@ -37,9 +39,9 @@ inline fun RecomposeTracker(
 
     val isEnabled = true //RecomposeLoggerConfig.isEnabled
     if (isEnabled) {
-        Log.d("RecomposeLogger", "$name recomposed ${ref.count} times.")
+        logDebug(LOGGER_TAG, "$name recomposed ${ref.count} times.")
         if (recomposeLog.isNotEmpty()) {
-            Log.d("RecomposeLogger", "Changes:${recomposeLog}\n")
+            logDebug(LOGGER_TAG, "Changes:${recomposeLog}\n")
         }
     }
 }
