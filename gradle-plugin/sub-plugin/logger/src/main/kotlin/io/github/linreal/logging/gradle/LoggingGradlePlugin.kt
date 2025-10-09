@@ -14,7 +14,7 @@ class LoggingGradlePlugin : KotlinCompilerPluginSupportPlugin {
     companion object {
         private const val PLUGIN_GROUP = "io.github.linreal"
         private const val PLUGIN_ARTIFACT = "logger-compiler-plugin"
-        private const val PLUGIN_VERSION = "0.1.4-SNAPSHOT"
+        private const val PLUGIN_VERSION = "0.1.5-SNAPSHOT"
         private const val ANNOTATIONS_ARTIFACT = "logging-annotations"
     }
     

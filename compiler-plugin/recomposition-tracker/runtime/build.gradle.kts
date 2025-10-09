@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,6 +8,7 @@ plugins {
     alias(libs.plugins.maven.publish)
 }
 
+@OptIn(ExperimentalWasmDsl::class)
 kotlin {
     androidTarget {
         publishLibraryVariants("release")
@@ -16,6 +18,10 @@ kotlin {
             }
         }
     }
+    wasmJs {
+        browser()
+        binaries.library()
+    }
     iosArm64()
     iosSimulatorArm64()
 
@@ -23,6 +29,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(libs.compose.runtime.mpp)
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
         val androidMain by getting {

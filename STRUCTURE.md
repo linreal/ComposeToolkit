@@ -67,8 +67,10 @@ recomposition-tracker/
         |   `-- TrackRecompositions.kt
         |-- androidMain/kotlin/io/github/linreal/retracker/
         |   `-- Logger.android.kt
-        `-- iosMain/kotlin/io/github/linreal/retracker/
-            `-- Logger.ios.kt
+        |-- iosMain/kotlin/io/github/linreal/retracker/
+        |   `-- Logger.ios.kt
+        `-- wasmJsMain/kotlin/io/github/linreal/retracker/
+            `-- Logger.wasm.kt
 ```
 
 ### 3. Gradle Plugins (`/gradle-plugin`)
