@@ -56,6 +56,7 @@ class RecompositionTrackerIrTransformer(
 ) : IrElementTransformerVoid() {
 
     private val composableFqName = FqName("androidx.compose.runtime.Composable")
+    private val readOnlyComposableFqName = FqName("androidx.compose.runtime.ReadOnlyComposable")
     private val trackRecompositionsAnnotationFqName =
         FqName("io.github.linreal.retracker.TrackRecompositions")
 
@@ -89,7 +90,10 @@ class RecompositionTrackerIrTransformer(
     override fun visitFunction(declaration: IrFunction): IrStatement {
         declaration.transformChildrenVoid(this)
 
-        if (!declaration.hasAnnotation(composableFqName)) return declaration
+        if (!declaration.hasAnnotation(composableFqName) || declaration.hasAnnotation(
+                readOnlyComposableFqName
+            )
+        ) return declaration
 
         val hasAnnotation = declaration.hasAnnotation(trackRecompositionsAnnotationFqName)
         val includeNested = hasAnnotation && getIncludeNestedValue(declaration)
