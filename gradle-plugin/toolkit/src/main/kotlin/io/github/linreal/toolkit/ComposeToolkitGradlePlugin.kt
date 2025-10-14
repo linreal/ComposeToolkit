@@ -9,7 +9,6 @@ import org.gradle.api.Project
  */
 class ComposeToolkitGradlePlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        target.pluginManager.apply("io.github.linreal.logger")
         target.pluginManager.apply("io.github.linreal.recomposition-tracker")
     }
 }

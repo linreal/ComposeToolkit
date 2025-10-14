@@ -6,7 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NoLiveLiterals
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 
 @PublishedApi
 internal const val LOGGER_TAG: String = "RecompositionTracker"
@@ -20,7 +19,7 @@ inline fun RecompositionTracker(
 ) {
     val refCount = remember { Ref(0) }
 
-    val previousArgs = remember { mutableStateOf(arguments.toMap()) }
+    val previousArgs = remember { arguments.toMutableMap() }
 
     LaunchedEffect(Unit) {
         val renderedArgs = if (arguments.isNotEmpty()) {
@@ -30,11 +29,11 @@ inline fun RecompositionTracker(
         } else {
             "no arguments"
         }
-        logDebug(LOGGER_TAG, "$name ($renderedArgs) enters composition")
+        logDebug(LOGGER_TAG, "$name enters composition, params: ($renderedArgs) ")
     }
     DisposableEffect(Unit) {
         onDispose {
-            logDebug(LOGGER_TAG, "$name exits composition")
+            logDebug(LOGGER_TAG, "$name exits composition, params: ($previousArgs)")
         }
     }
     SideEffect { refCount.count++ }
@@ -43,7 +42,7 @@ inline fun RecompositionTracker(
     changesLog.clear()
 
     for ((argumentName, currentValue) in arguments) {
-        val previousValue = previousArgs.value[argumentName]
+        val previousValue = previousArgs[argumentName]
 
         if (currentValue != previousValue) {
             changesLog.apply {
@@ -55,12 +54,14 @@ inline fun RecompositionTracker(
     }
 
     if (changesLog.isNotEmpty()) {
-        previousArgs.value = arguments.toMap()
+        previousArgs.clear()
+        previousArgs.putAll(arguments)
     }
-
-    logDebug(LOGGER_TAG, "$name recomposed ${refCount.count} times")
-    if (changesLog.isNotEmpty()) {
-        logDebug(LOGGER_TAG, "Changes:$changesLog\n")
+    if (refCount.count > 0) {
+        logDebug(LOGGER_TAG, "$name recomposed ${refCount.count} times")
+        if (changesLog.isNotEmpty()) {
+            logDebug(LOGGER_TAG, "Changes:$changesLog\n")
+        }
     }
 }
 

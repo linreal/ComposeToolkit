@@ -20,7 +20,7 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     companion object {
         private const val PLUGIN_GROUP = "io.github.linreal"
         private const val PLUGIN_ARTIFACT = "recomposition-tracker-compiler-plugin"
-        private const val PLUGIN_VERSION = "0.1.5-SNAPSHOT"
+        private const val PLUGIN_VERSION = "0.1.7-SNAPSHOT"
         private const val RUNTIME_ARTIFACT = "recomposition-tracker-runtime"
     }
     override fun apply(target: Project) {
