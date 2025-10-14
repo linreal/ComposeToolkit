@@ -11,7 +11,6 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 open class RecompositionTrackerExtension {
     var enabled: Boolean = true
-    var skipInline: Boolean = true
     var onlyInDebug: Boolean = true
 }
 
@@ -80,7 +79,6 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
         return project.provider {
             listOf(
                 SubpluginOption(key = "enabled", value = ext.enabled.toString()),
-                SubpluginOption(key = "skipInline", value = ext.skipInline.toString())
             )
         }
     }

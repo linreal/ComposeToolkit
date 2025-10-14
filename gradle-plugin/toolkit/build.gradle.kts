@@ -5,7 +5,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":gradle-plugin:sub-plugin:logger"))
     implementation(project(":gradle-plugin:sub-plugin:recomposition-tracker"))
 }
 

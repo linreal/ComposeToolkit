@@ -19,12 +19,11 @@ class RecompositionTrackerCompilerPluginRegistrar : CompilerPluginRegistrar() {
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val mc = configuration.msg()
         val enabled = configuration.get(KEY_ENABLED, true)
-        val skipInline = configuration.get(KEY_SKIP_INLINE, true)
-        mc.report(CompilerMessageSeverity.WARNING, "[RecompositionTracker] enabled=$enabled, skipInline=$skipInline")
+        mc.report(CompilerMessageSeverity.WARNING, "[RecompositionTracker] enabled=$enabled")
 
         if (enabled) {
             IrGenerationExtension.registerExtension(
-                RecompositionTrackerIrGenerationExtension(skipInline)
+                RecompositionTrackerIrGenerationExtension()
             )
             mc.report(CompilerMessageSeverity.WARNING, "[RecompositionTracker] IR extension registered")
         }
@@ -34,7 +33,6 @@ class RecompositionTrackerCompilerPluginRegistrar : CompilerPluginRegistrar() {
         const val PLUGIN_ID = "io.github.linreal.plugin.recomposition-tracker"
 
         val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
-        val KEY_SKIP_INLINE = CompilerConfigurationKey<Boolean>("skipInline")
     }
 }
 

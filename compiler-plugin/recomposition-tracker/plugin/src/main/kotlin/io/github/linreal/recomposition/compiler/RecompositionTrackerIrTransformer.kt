@@ -52,7 +52,6 @@ import org.jetbrains.kotlin.name.Name
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class RecompositionTrackerIrTransformer(
     private val pluginContext: IrPluginContext,
-    private val skipInline: Boolean
 ) : IrElementTransformerVoid() {
 
     private val composableFqName = FqName("androidx.compose.runtime.Composable")
@@ -212,8 +211,7 @@ class RecompositionTrackerIrTransformer(
     /**
      * Injects the `RecomposeTracker` invocation at the top of the provided composable's body
      *
-     * We respect `skipInline` to avoid altering inline functions unless explicitly requested, and we
-     * keep track of already-instrumented symbols to prevent duplicate inserts when a symbol is
+     * We keep track of already-instrumented symbols to prevent duplicate inserts when a symbol is
      * reachable along multiple paths
      */
     private fun instrumentFunction(function: IrFunction) {
@@ -223,7 +221,6 @@ class RecompositionTrackerIrTransformer(
         val trackerSymbol = recomposeTrackerSymbol ?: return
 
         val body = function.body ?: return
-        if (skipInline && function is IrSimpleFunction && function.isInline) return
 
         val builder = DeclarationIrBuilder(pluginContext, symbol)
         val trackerOwner = trackerSymbol.owner

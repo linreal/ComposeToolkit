@@ -35,10 +35,7 @@ android {
         jvmTarget = "11"
         // Temporary direct wiring while composite plugin remains local-only
         freeCompilerArgs += listOf(
-            "-P", "plugin:io.github.linreal.plugin.logging:enabled=true",
-            "-P", "plugin:io.github.linreal.plugin.logging:skipInline=true",
             "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:enabled=true",
-            "-P", "plugin:io.github.linreal.plugin.recomposition-tracker:skipInline=true",
         )
     }
     buildFeatures {
@@ -48,10 +45,7 @@ android {
 
 dependencies {
     implementation(project(":compiler-plugin:recomposition-tracker:runtime"))
-    implementation(project(":compiler-plugin:logger:runtime"))
-    implementation(project(":logging-annotations"))
     // Directly wire compiler plugin classpaths for local development
-    kotlinCompilerPluginClasspath(project(":compiler-plugin:logger:plugin"))
     kotlinCompilerPluginClasspath(project(":compiler-plugin:recomposition-tracker:plugin"))
 
     implementation(libs.androidx.core.ktx)

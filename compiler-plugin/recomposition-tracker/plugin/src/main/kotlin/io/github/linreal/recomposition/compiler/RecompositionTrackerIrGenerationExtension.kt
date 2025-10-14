@@ -6,10 +6,9 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 
 class RecompositionTrackerIrGenerationExtension(
-    private val skipInline: Boolean
 ) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
-        val transformer = RecompositionTrackerIrTransformer(pluginContext, skipInline)
+        val transformer = RecompositionTrackerIrTransformer(pluginContext)
         moduleFragment.transformChildrenVoid(transformer)
         transformer.finish()
     }
