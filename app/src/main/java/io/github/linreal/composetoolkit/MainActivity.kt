@@ -105,6 +105,30 @@ private fun ToolkitDemoHost(modifier: Modifier = Modifier) {
         ) {
             DerivedStateSample()
         }
+
+        RecompositionCaseCard(
+            title = "Skip parameter tracking - Modifier",
+            description = "Tests @SkipRecompositionTracking on Modifier parameter. Changing " +
+                "padding should not log recomposition, but changing text will."
+        ) {
+            SkipModifierSample()
+        }
+
+        RecompositionCaseCard(
+            title = "Skip parameter tracking - Animation value",
+            description = "Tests @SkipRecompositionTracking on frequently-changing animation " +
+                "parameter. Only text changes should be logged."
+        ) {
+            SkipAnimationSample()
+        }
+
+        RecompositionCaseCard(
+            title = "Mixed tracking parameters",
+            description = "Tests multiple parameters with some tracked and some skipped. " +
+                "Observe which changes trigger logging."
+        ) {
+            MixedParametersSample()
+        }
     }
 }
 
@@ -236,6 +260,201 @@ private fun DerivedStateSample() {
                 "Matches: ${matches.joinToString(separator = ", ")}"
             },
             style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+// ============================================================================
+// Parameter-level @SkipRecompositionTracking tests
+// ============================================================================
+
+@Composable
+private fun SkipModifierSample() {
+    var text by remember { mutableStateOf("Hello") }
+    var paddingDp by remember { mutableIntStateOf(8) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SkipModifierContent(
+            text = text,
+            modifier = Modifier.padding(paddingDp.dp)
+        )
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text("Text (tracked)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Padding: ${paddingDp}dp",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+            )
+            Button(onClick = { paddingDp += 4 }) {
+                Text("+")
+            }
+            Button(onClick = { paddingDp = (paddingDp - 4).coerceAtLeast(0) }) {
+                Text("-")
+            }
+        }
+    }
+}
+
+@TrackRecompositions
+@Composable
+private fun SkipModifierContent(
+    text: String,
+    @SkipRecompositionTracking modifier: Modifier = Modifier
+) {
+    Text(
+        text = "Content: $text",
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun SkipAnimationSample() {
+    var counter by remember { mutableIntStateOf(0) }
+    var animProgress by remember { mutableIntStateOf(0) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SkipAnimationContent(
+            counter = counter,
+            animationProgress = animProgress / 100f
+        )
+
+        Button(onClick = { counter++ }) {
+            Text("Increment counter (tracked)")
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Animation: ${animProgress}%",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+            )
+            Button(onClick = { animProgress = (animProgress + 10).coerceAtMost(100) }) {
+                Text("+10%")
+            }
+            Button(onClick = { animProgress = (animProgress - 10).coerceAtLeast(0) }) {
+                Text("-10%")
+            }
+        }
+    }
+}
+
+@TrackRecompositions
+@Composable
+private fun SkipAnimationContent(
+    counter: Int,
+    @SkipRecompositionTracking animationProgress: Float
+) {
+    Text(
+        text = "Counter: $counter | Animation: ${(animationProgress * 100).toInt()}%",
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
+
+@Composable
+private fun MixedParametersSample() {
+    var importantValue by remember { mutableStateOf("Important") }
+    var unimportantValue by remember { mutableStateOf("Unimportant") }
+    var skippedNumber by remember { mutableIntStateOf(0) }
+    var trackedNumber by remember { mutableIntStateOf(0) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        MixedParametersContent(
+            important = importantValue,
+            unimportant = unimportantValue,
+            skippedCount = skippedNumber,
+            trackedCount = trackedNumber
+        )
+
+        Text(
+            text = "Tracked parameters:",
+            style = MaterialTheme.typography.labelMedium
+        )
+
+        OutlinedTextField(
+            value = importantValue,
+            onValueChange = { importantValue = it },
+            label = { Text("Important (tracked)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Tracked: $trackedNumber",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+            )
+            Button(onClick = { trackedNumber++ }) {
+                Text("+")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Skipped parameters (won't trigger logging):",
+            style = MaterialTheme.typography.labelMedium
+        )
+
+        OutlinedTextField(
+            value = unimportantValue,
+            onValueChange = { unimportantValue = it },
+            label = { Text("Unimportant (skipped)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Skipped: $skippedNumber",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+            )
+            Button(onClick = { skippedNumber++ }) {
+                Text("+")
+            }
+        }
+    }
+}
+
+@TrackRecompositions
+@Composable
+private fun MixedParametersContent(
+    important: String,
+    @SkipRecompositionTracking unimportant: String,
+    @SkipRecompositionTracking skippedCount: Int,
+    trackedCount: Int
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = "Important: $important (tracked)",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = "Unimportant: $unimportant (skipped)",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            text = "Tracked count: $trackedCount | Skipped count: $skippedCount",
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }

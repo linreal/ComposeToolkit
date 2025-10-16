@@ -15,11 +15,12 @@ internal const val LOGGER_TAG: String = "RecompositionTracker"
 @Composable
 inline fun RecompositionTracker(
     name: String,
-    arguments: Map<String, Any?>
+    arguments: Map<String, Any?>,
+    skippedArgumentNames: Set<String> = emptySet()
 ) {
-    val refCount = remember { Ref(0) }
-
+    val loggedRecompositionCount = remember { Ref(0) }
     val previousArgs = remember { arguments.toMutableMap() }
+    val isInitialComposition = remember { Ref(true) }
 
     LaunchedEffect(Unit) {
         val renderedArgs = if (arguments.isNotEmpty()) {
@@ -31,42 +32,67 @@ inline fun RecompositionTracker(
         }
         logDebug(LOGGER_TAG, "$name enters composition, params: ($renderedArgs) ")
     }
+
     DisposableEffect(Unit) {
         onDispose {
             logDebug(LOGGER_TAG, "$name exits composition, params: ($previousArgs)")
         }
     }
-    SideEffect { refCount.count++ }
+
+    SideEffect {
+        isInitialComposition.value = false
+    }
 
     val changesLog = remember { StringBuilder() }
     changesLog.clear()
 
-    for ((argumentName, currentValue) in arguments) {
-        val previousValue = previousArgs[argumentName]
+    var hasSignificantChanges = false
+    var hasAnyChanges = false
 
-        if (currentValue != previousValue) {
-            changesLog.apply {
-                append("\n••• $argumentName: ")
-                append("${previousValue.safeToString()} (${previousValue.safeHashCode()}) → ")
-                append("${currentValue.safeToString()} (${currentValue.safeHashCode()})")
+    for ((argumentName, currentValue) in arguments) {
+        if (previousArgs.containsKey(argumentName) && currentValue != previousArgs[argumentName]) {
+            hasAnyChanges = true
+            val isSkipped = skippedArgumentNames.contains(argumentName)
+
+            if (!isSkipped) {
+                hasSignificantChanges = true
+                val previousValue = previousArgs[argumentName]
+                changesLog.apply {
+                    append("\n••• $argumentName: ")
+                    append("${previousValue.safeToString()} (${previousValue.safeHashCode()}) → ")
+                    append("${currentValue.safeToString()} (${currentValue.safeHashCode()})")
+                }
             }
         }
     }
 
-    if (changesLog.isNotEmpty()) {
+    if (hasAnyChanges) {
         previousArgs.clear()
         previousArgs.putAll(arguments)
     }
-    if (refCount.count > 0) {
-        logDebug(LOGGER_TAG, "$name recomposed ${refCount.count} times")
-        if (changesLog.isNotEmpty()) {
-            logDebug(LOGGER_TAG, "Changes:$changesLog\n")
+
+    if (!isInitialComposition.value) {
+        val shouldLog = hasSignificantChanges || !hasAnyChanges
+
+        if (shouldLog) {
+            loggedRecompositionCount.value++
+
+            if (hasSignificantChanges) {
+                logDebug(LOGGER_TAG, "$name recomposed ${loggedRecompositionCount.value} times")
+                logDebug(LOGGER_TAG, "Changes:$changesLog\n")
+            } else {
+                logDebug(
+                    LOGGER_TAG,
+                    "$name recomposed ${loggedRecompositionCount.value} times due to internal state change\n"
+                )
+            }
         }
     }
 }
 
+
 @PublishedApi
-internal class Ref(var count: Int = 0)
+internal class Ref<T>(var value: T)
 
 @PublishedApi
 internal fun Any?.safeHashCode(): Int = this?.hashCode() ?: 0

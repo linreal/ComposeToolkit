@@ -14,16 +14,20 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irTemporary
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionReference
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -34,6 +38,7 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import kotlin.collections.map
 
 /**
  * Instruments composable functions with calls to `RecomposeTracker`.
@@ -65,7 +70,7 @@ class RecompositionTrackerIrTransformer(
     private val recomposeTrackerSymbol by lazy {
         val id =
             CallableId(FqName("io.github.linreal.retracker"), Name.identifier("RecompositionTracker"))
-        pluginContext.referenceFunctions(id).firstOrNull { it.owner.valueParams.size == 2 }
+        pluginContext.referenceFunctions(id).firstOrNull { it.owner.valueParams.size == 3 }
     }
 
     /** Metadata index built during the analysis phase */
@@ -226,9 +231,13 @@ class RecompositionTrackerIrTransformer(
         val trackerCall = builder.irCall(trackerSymbol).apply {
             val name = function.fqNameWhenAvailable?.asString() ?: function.name.asString()
             val nameParam = trackerOwner.valueParams[0]
-            val argsParam = trackerOwner.valueParams[1]
+            val argumentsParam = trackerOwner.valueParams[1]
+            val skippedNamesParam = trackerOwner.valueParams[2]
             arguments[nameParam.indexInParameters] = builder.irString(name)
-            arguments[argsParam.indexInParameters] = buildArgumentsMap(builder, function)
+
+            val (argumentsMap, skippedNamesSet) = buildArgumentsAndSkippedNames(builder, function)
+            arguments[argumentsParam.indexInParameters] = argumentsMap
+            arguments[skippedNamesParam.indexInParameters] = skippedNamesSet
         }
 
         when (body) {
@@ -270,13 +279,16 @@ class RecompositionTrackerIrTransformer(
     }
 
     /**
-     * Builds a mutable map containing the composable's parameter snapshot that the tracker uses to
-     * diff argument changes between recompositions
+     * Builds a map of all parameters and a set of skipped parameter names:
+     * 1. All parameters map - contains all function parameters
+     * 2. Skipped parameter names set - contains names of parameters marked with @SkipRecompositionTracking
+     *
+     * The tracker uses these to determine whether to log recomposition events.
      */
-    private fun buildArgumentsMap(
+    private fun buildArgumentsAndSkippedNames(
         builder: IrBuilderWithScope,
         function: IrFunction
-    ) = with(builder) {
+    ): Pair<IrExpression, IrExpression> = with(builder) {
         val stringType = pluginContext.irBuiltIns.stringType
         val anyNType = pluginContext.irBuiltIns.anyNType
 
@@ -288,39 +300,106 @@ class RecompositionTrackerIrTransformer(
             CallableId(FqName("kotlin.collections"), Name.identifier("emptyMap"))
         ).first()
 
+        val emptySetSymbol = pluginContext.referenceFunctions(
+            CallableId(FqName("kotlin.collections"), Name.identifier("emptySet"))
+        ).first()
+
         if (mutableMapOf == null) {
-            return@with irCall(emptyMapSymbol).apply {
+            val emptyMap = irCall(emptyMapSymbol).apply {
                 typeArguments[0] = stringType
                 typeArguments[1] = anyNType
             }
+            val emptySet = irCall(emptySetSymbol).apply {
+                typeArguments[0] = stringType
+            }
+            return@with Pair(emptyMap, emptySet)
         }
 
-        irBlock {
-            val tmp = irTemporary(
-                irCall(mutableMapOf).apply {
-                    typeArguments[0] = stringType
-                    typeArguments[1] = anyNType
-                },
-                nameHint = "args"
-            )
+        // Build map with all parameters
+        val allParams = function.valueParams
+        val argumentsMap = buildMapForParams(allParams, mutableMapOf, stringType, anyNType)
 
-            val mutMapClass = pluginContext.irBuiltIns.mutableMapClass
-            val putSymbol = (mutMapClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
-                .first { it.name.asString() == "put" && it.valueParams.size == 2 }).symbol
-            val putOwner = putSymbol.owner
-            val keyParam = putOwner.valueParams[0]
-            val valueParam = putOwner.valueParams[1]
-            function.valueParams.forEach { param ->
-                +irCall(putSymbol).apply {
-                    dispatchReceiver = irGet(tmp)
-                    arguments[keyParam.indexInParameters] = irString(param.name.asString())
-                    arguments[valueParam.indexInParameters] = irAs(irGet(param), anyNType)
-                }
+        // Build set with names of skipped parameters
+        val skippedParams = allParams.filter { it.hasAnnotation(skipTrackingAnnotationFqName) }
+        val skippedNamesSet = buildSkippedNamesSet(skippedParams, stringType)
+
+        return@with Pair(argumentsMap, skippedNamesSet)
+    }
+
+    /**
+     * Helper function to build a mutable map IR expression for a given list of parameters
+     */
+    private fun IrBuilderWithScope.buildMapForParams(
+        params: List<org.jetbrains.kotlin.ir.declarations.IrValueParameter>,
+        mutableMapOfSymbol: IrFunctionSymbol,
+        stringType: org.jetbrains.kotlin.ir.types.IrType,
+        anyNType: org.jetbrains.kotlin.ir.types.IrType
+    ): IrExpression = irBlock {
+        val tmp = irTemporary(
+            irCall(mutableMapOfSymbol).apply {
+                typeArguments[0] = stringType
+                typeArguments[1] = anyNType
+            },
+            nameHint = "args"
+        )
+
+        val mutMapClass = pluginContext.irBuiltIns.mutableMapClass
+        val putSymbol = (mutMapClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
+            .first { it.name.asString() == "put" && it.valueParams.size == 2 }).symbol
+        val putOwner = putSymbol.owner
+        val keyParam = putOwner.valueParams[0]
+        val valueParam = putOwner.valueParams[1]
+
+        params.forEach { param ->
+            +irCall(putSymbol).apply {
+                dispatchReceiver = irGet(tmp)
+                arguments[keyParam.indexInParameters] = irString(param.name.asString())
+                arguments[valueParam.indexInParameters] = irAs(irGet(param), anyNType)
             }
+        }
 
-            +irGet(tmp)
+        +irGet(tmp)
+    }
+
+    /**
+     * Helper function to build a set IR expression containing names of skipped parameters
+     */
+    private fun IrBuilderWithScope.buildSkippedNamesSet(
+        skippedParams: List<IrValueParameter>,
+        stringType: IrType
+    ): IrExpression {
+        if (skippedParams.isEmpty()) {
+            val emptySetSymbol = pluginContext.referenceFunctions(
+                CallableId(FqName("kotlin.collections"), Name.identifier("emptySet"))
+            ).first()
+            return irCall(emptySetSymbol).apply {
+                typeArguments[0] = stringType
+            }
+        }
+
+        val setOfSymbol = pluginContext.referenceFunctions(
+            CallableId(FqName("kotlin.collections"), Name.identifier("setOf"))
+        ).firstOrNull { it.owner.valueParams.size == 1 && it.owner.valueParams[0].varargElementType != null }
+
+        if (setOfSymbol == null) {
+            val emptySetSymbol = pluginContext.referenceFunctions(
+                CallableId(FqName("kotlin.collections"), Name.identifier("emptySet"))
+            ).first()
+            return irCall(emptySetSymbol).apply {
+                typeArguments[0] = stringType
+            }
+        }
+
+        return irCall(setOfSymbol).apply {
+            typeArguments[0] = stringType
+            val varargParam = setOfSymbol.owner.valueParams[0]
+            arguments[varargParam.indexInParameters] = irVararg(
+                stringType,
+                skippedParams.map { irString(it.name.asString()) }
+            )
         }
     }
+
     private fun IrFunction.shouldNotTrack(): Boolean {
        return !hasAnnotation(composableFqName) || this.hasAnnotation(
                 readOnlyComposableFqName
