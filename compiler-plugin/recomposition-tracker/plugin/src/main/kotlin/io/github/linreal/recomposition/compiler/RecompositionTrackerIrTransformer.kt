@@ -58,6 +58,8 @@ class RecompositionTrackerIrTransformer(
     private val readOnlyComposableFqName = FqName("androidx.compose.runtime.ReadOnlyComposable")
     private val trackRecompositionsAnnotationFqName =
         FqName("io.github.linreal.retracker.TrackRecompositions")
+    private val skipTrackingAnnotationFqName =
+        FqName("io.github.linreal.retracker.SkipRecompositionTracking")
 
     @OptIn(UnsafeDuringIrConstructionAPI::class)
     private val recomposeTrackerSymbol by lazy {
@@ -89,10 +91,7 @@ class RecompositionTrackerIrTransformer(
     override fun visitFunction(declaration: IrFunction): IrStatement {
         declaration.transformChildrenVoid(this)
 
-        if (!declaration.hasAnnotation(composableFqName) || declaration.hasAnnotation(
-                readOnlyComposableFqName
-            )
-        ) return declaration
+        if (declaration.shouldNotTrack()) return declaration
 
         val hasAnnotation = declaration.hasAnnotation(trackRecompositionsAnnotationFqName)
         val includeNested = hasAnnotation && getIncludeNestedValue(declaration)
@@ -321,5 +320,11 @@ class RecompositionTrackerIrTransformer(
 
             +irGet(tmp)
         }
+    }
+    private fun IrFunction.shouldNotTrack(): Boolean {
+       return !hasAnnotation(composableFqName) || this.hasAnnotation(
+                readOnlyComposableFqName
+            ) || this.hasAnnotation(skipTrackingAnnotationFqName)
+
     }
 }
