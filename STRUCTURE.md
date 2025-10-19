@@ -18,16 +18,29 @@ Kotlin compiler plugin toolkit for Jetpack Compose performance analysis and debu
 ### 1. Android Demo App (`/app`)
 ```
 app/
-|-- build.gradle.kts            # Android app build config
+|-- build.gradle.kts            # Android app build config (uses direct project dependencies)
 |-- src/main/
 |   |-- AndroidManifest.xml
 |   |-- java/io/github/linreal/composetoolkit/
-|   |   |-- MainActivity.kt     # Main activity
+|   |   |-- MainActivity.kt     # Main activity with recomposition tracking demos
 |   |   `-- ui/theme/          # Compose theme setup
 |   `-- res/                   # Android resources
 ```
 
-### 2. Compiler Plugins (`/compiler-plugin`)
+### 2. Sample App (`/sample`)
+```
+sample/
+|-- build.gradle.kts            # Android app build config (uses published plugin via alias)
+|-- src/main/
+|   |-- AndroidManifest.xml
+|   |-- java/io/github/linreal/composetoolkit/sample/
+|   |   |-- MainActivity.kt     # Main activity (same as app module)
+|   |   `-- ui/theme/          # Compose theme setup
+|   `-- res/                   # Android resources
+```
+**Purpose**: Demonstrates plugin usage via Gradle version catalog, simulating real-world integration
+
+### 3. Compiler Plugins (`/compiler-plugin`)
 Two main compiler plugins, each with plugin + runtime structure:
 
 
@@ -57,7 +70,7 @@ recomposition-tracker/
             `-- Logger.wasm.kt
 ```
 
-### 3. Gradle Plugins (`/gradle-plugin`)
+### 4. Gradle Plugins (`/gradle-plugin`)
 ```
 gradle-plugin/
 |-- toolkit/                   # Main user-facing plugin

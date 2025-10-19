@@ -2,14 +2,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.toolkit)
 }
 
 android {
-    namespace = "io.github.linreal.composetoolkit"
+    namespace = "io.github.linreal.composetoolkit.sample"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "io.github.linreal.composetoolkit"
+        applicationId = "io.github.linreal.composetoolkit.sample"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -40,10 +41,6 @@ android {
 }
 
 dependencies {
-    // FOR LOCAL PLUGIN DEVELOPMENT ONLY, OTHERWISE, CONNECT VIA APPLY
-    implementation(project(":compiler-plugin:recomposition-tracker:runtime"))
-    kotlinCompilerPluginClasspath(project(":compiler-plugin:recomposition-tracker:plugin"))
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
