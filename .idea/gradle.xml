@@ -19,6 +19,7 @@
             <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin" />
             <option value="$PROJECT_DIR$/gradle-plugin/sub-plugin/recomposition-tracker" />
             <option value="$PROJECT_DIR$/gradle-plugin/toolkit" />
+            <option value="$PROJECT_DIR$/sample" />
           </set>
         </option>
       </GradleProjectSettings>

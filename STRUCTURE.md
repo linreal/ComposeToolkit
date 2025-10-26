@@ -7,17 +7,18 @@ Kotlin compiler plugin toolkit for Jetpack Compose performance analysis and debu
 ```
 |-- settings.gradle.kts          # Project module definitions
 |-- build.gradle.kts             # Root build configuration
+|-- build-logic/                 # Included build with shared convention plugins
 |-- gradle/libs.versions.toml    # Version catalog
-|-- gradle.properties           # Gradle properties
-|-- local.properties           # Local environment config
-`-- gradlew[.bat]              # Gradle wrapper scripts
+|-- gradle.properties            # Gradle properties
+|-- local.properties             # Local environment config
+`-- gradlew[.bat]                # Gradle wrapper scripts
 ```
 
 ## Main Modules
 
-### 1. Android Demo App (`/app`)
+### 1. Android Demo App (`/app-local`)
 ```
-app/
+app-local/
 |-- build.gradle.kts            # Android app build config (uses direct project dependencies)
 |-- src/main/
 |   |-- AndroidManifest.xml
@@ -83,6 +84,16 @@ gradle-plugin/
         `-- src/main/kotlin/io/github/linreal/recomposition/gradle/
             `-- RecompositionTrackerGradlePlugin.kt
 ```
+
+### 5. Build Logic (`/build-logic`)
+```
+build-logic/
+|-- build.gradle.kts           # Convention plugin project (kotlin-dsl)
+|-- settings.gradle.kts        # Included build configuration
+`-- src/main/kotlin/io/github/linreal/gradle/
+    `-- PublishingConventionsPlugin.kt  # Shared publishing defaults for Maven Central
+```
+**Purpose**: Hosts reusable Gradle conventions (currently Maven Central publishing block) that can be applied across modules.
 
 ## Module Dependencies
 - **App**: Uses runtime libraries from both plugins

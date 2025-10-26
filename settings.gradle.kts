@@ -22,7 +22,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Compose Toolkit"
-include(":app")
+includeBuild("build-logic")
+include(":app-local")
 include(":sample")
 include(":compiler-plugin:recomposition-tracker:plugin")
 include(":compiler-plugin:recomposition-tracker:runtime")

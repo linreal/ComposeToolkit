@@ -1,4 +1,3 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     dependencies {
         classpath(libs.gradle)
@@ -15,7 +14,6 @@ plugins {
     alias(libs.plugins.maven.publish) apply false
 }
 
-// Load local.properties for signing credentials
 val localProperties = java.util.Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {

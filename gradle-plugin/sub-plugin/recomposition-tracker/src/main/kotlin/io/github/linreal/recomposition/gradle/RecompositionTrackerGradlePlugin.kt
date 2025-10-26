@@ -3,6 +3,7 @@ package io.github.linreal.recomposition.gradle
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import io.github.linreal.gradle.PublishingConventionsVersion
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
@@ -20,8 +21,9 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     companion object {
         private const val PLUGIN_GROUP = "io.github.linreal"
         private const val PLUGIN_ARTIFACT = "recomposition-tracker-compiler-plugin"
-        private const val PLUGIN_VERSION = "0.1.9-SNAPSHOT"
         private const val RUNTIME_ARTIFACT = "recomposition-tracker-runtime"
+        private val PLUGIN_VERSION: String
+            get() = PublishingConventionsVersion.VERSION
     }
     override fun apply(target: Project) {
         println("[RecompositionTrackerGradlePlugin] Applied to project: ${target.name}")
