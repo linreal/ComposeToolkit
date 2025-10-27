@@ -18,6 +18,9 @@ inline fun RecompositionTracker(
     arguments: Map<String, Any?>,
     skippedArgumentNames: Set<String> = emptySet()
 ) {
+    if (!RecompositionTrackingSettings.isEnabled) {
+        return
+    }
     val loggedRecompositionCount = remember { Ref(0) }
     val previousArgs = remember { arguments.toMutableMap() }
     val isInitialComposition = remember { Ref(true) }

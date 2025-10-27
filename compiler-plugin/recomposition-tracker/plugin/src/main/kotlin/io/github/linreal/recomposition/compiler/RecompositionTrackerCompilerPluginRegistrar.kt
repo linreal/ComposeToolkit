@@ -18,7 +18,7 @@ class RecompositionTrackerCompilerPluginRegistrar : CompilerPluginRegistrar() {
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val mc = configuration.msg()
-        val enabled = configuration.get(KEY_ENABLED, true)
+        val enabled = configuration.get(KEY_ENABLED, false)
         mc.report(CompilerMessageSeverity.WARNING, "[RecompositionTracker] enabled=$enabled")
 
         if (enabled) {

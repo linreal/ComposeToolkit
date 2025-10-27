@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.compose.toolkit)
 }
 
+recompositionTracker {
+    enabled = true
+    onlyInDebug = true
+}
+
 android {
     namespace = "io.github.linreal.composetoolkit.sample"
     compileSdk = 36
