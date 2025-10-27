@@ -31,6 +31,61 @@ plugins {
 ```
 
 
+## Configuration
+
+The plugin can be configured in your module's `build.gradle.kts`:
+
+```kotlin
+recompositionTracker {
+    enabled = true        // Enable or disable the plugin (default: true)
+    onlyInDebug = true    // Only apply tracking in debug builds (default: true)
+}
+```
+
+### Configuration Options
+
+- **`enabled`**: Master switch to enable or disable the recomposition tracker plugin entirely.
+  - `true` (default): Plugin is active and will track recompositions
+  - `false`: Plugin is completely disabled, no tracking code is injected
+
+- **`onlyInDebug`**: Controls whether the plugin should only apply to debug build variants.
+  - `true` (default): Only tracks recompositions in debug builds, no overhead in release builds
+  - `false`: Tracks recompositions in all build variants (debug and release)
+
+### Configuration Examples
+
+**Default behavior** (enabled in debug builds only):
+```kotlin
+// No configuration needed - uses defaults
+plugins {
+    id("io.github.linreal.recomposition-tracker") version "1.0.0"
+}
+```
+
+**Completely disable the plugin**:
+```kotlin
+recompositionTracker {
+    enabled = false
+}
+```
+
+**Enable in all build variants** (including release):
+```kotlin
+recompositionTracker {
+    enabled = true
+    onlyInDebug = false  // Also track in release builds
+}
+```
+
+**Conditional configuration**:
+```kotlin
+recompositionTracker {
+    enabled = project.hasProperty("trackRecompositions")
+    onlyInDebug = true
+}
+// Then run: ./gradlew assembleDebug -PtrackRecompositions
+```
+
 ## Usage
 
 Simply annotate any `@Composable` function you want to track:
@@ -64,9 +119,8 @@ fun MyComposable(count: Int, name: String) {
 
 ## Limitations
 
-- Logs are only visible in debug builds (consider adding build variant filtering)
 - Currently logs to Android Logcat using `android.util.Log`
-- Tracking is always enabled in the current version
+- Tracking requires annotating functions with `@TrackRecompositions`
 
 ## Contributing
 

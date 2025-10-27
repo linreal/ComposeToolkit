@@ -14,7 +14,8 @@ composeBom = "2025.08.00"
 mavenPublish = "0.34.0"
 composeMultiplatform = "1.7.0"
 kotlinxCoroutines = "1.9.0"
-composeToolkit = "0.1.11-SNAPSHOT"
+
+composeToolkit = "0.1.13-SNAPSHOT"
 
 
 [libraries]

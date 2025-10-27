@@ -54,16 +54,35 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
         val project = kotlinCompilation.target.project
-        val ext = project.extensions.findByType(RecompositionTrackerExtension::class.java) ?: return false
-        if (!ext.enabled) return false
+        val ext = project.extensions.findByType(RecompositionTrackerExtension::class.java)
+
+        println("[RecompositionTracker] isApplicable() called for compilation: ${kotlinCompilation.name}")
+        println("[RecompositionTracker] Extension found: ${ext != null}")
+
+        if (ext == null) {
+            println("[RecompositionTracker] Extension not found, returning false")
+            return false
+        }
+
+        println("[RecompositionTracker] ext.enabled = ${ext.enabled}")
+        println("[RecompositionTracker] ext.onlyInDebug = ${ext.onlyInDebug}")
+
+        if (!ext.enabled) {
+            println("[RecompositionTracker] Plugin disabled by configuration, returning false")
+            return false
+        }
 
         if (ext.onlyInDebug) {
             val android = project.extensions.findByType(BaseExtension::class.java)
             if (android != null) {
                 val compilationName = kotlinCompilation.name.lowercase()
-                return compilationName.contains("debug")
+                val isDebug = compilationName.contains("debug")
+                println("[RecompositionTracker] onlyInDebug=true, compilation=$compilationName, isDebug=$isDebug")
+                return isDebug
             }
         }
+
+        println("[RecompositionTracker] isApplicable returning true")
         return true
     }
 
@@ -78,10 +97,16 @@ class RecompositionTrackerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {
         val project = kotlinCompilation.target.project
         val ext = project.extensions.getByType(RecompositionTrackerExtension::class.java)
+
+        println("[RecompositionTracker] applyToCompilation() called for compilation: ${kotlinCompilation.name}")
+        println("[RecompositionTracker] Passing enabled=${ext.enabled} to compiler plugin")
+
         return project.provider {
-            listOf(
+            val options = listOf(
                 SubpluginOption(key = "enabled", value = ext.enabled.toString()),
             )
+            println("[RecompositionTracker] Provider evaluated: options=$options")
+            options
         }
     }
 }
