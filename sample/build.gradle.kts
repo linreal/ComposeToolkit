@@ -6,7 +6,7 @@ plugins {
 }
 
 recompositionTracker {
-    enabled = false
+    enabled = true
     onlyInDebug = true
 }
 

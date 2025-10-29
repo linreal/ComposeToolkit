@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="17">
+      <module name="Compose_Toolkit.app" target="21" />
       <module name="Compose_Toolkit.compiler-plugin.logger.runtime" target="21" />
       <module name="Compose_Toolkit.compiler-plugin.logger.runtime.jvmMain" target="21" />
       <module name="Compose_Toolkit.compiler-plugin.logger.runtime.jvmTest" target="21" />
