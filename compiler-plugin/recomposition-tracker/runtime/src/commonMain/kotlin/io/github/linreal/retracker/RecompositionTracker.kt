@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NoLiveLiterals
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 
 @PublishedApi
@@ -22,7 +23,7 @@ inline fun RecompositionTracker(
         return
     }
     val loggedRecompositionCount = remember { Ref(0) }
-    val previousArgs = remember { arguments.toMutableMap() }
+    val previousArgs = remember { mutableMapOf<String, Any?>() }
     val isInitialComposition = remember { Ref(true) }
 
     LaunchedEffect(Unit) {
@@ -52,27 +53,41 @@ inline fun RecompositionTracker(
     var hasSignificantChanges = false
     var hasAnyChanges = false
 
+    val currentUnwrappedArgs = mutableMapOf<String, Any?>()
     for ((argumentName, currentValue) in arguments) {
-        if (previousArgs.containsKey(argumentName) && currentValue != previousArgs[argumentName]) {
-            hasAnyChanges = true
-            val isSkipped = skippedArgumentNames.contains(argumentName)
+        currentUnwrappedArgs[argumentName] = if (currentValue is State<*>) {
+            currentValue.value
+        } else {
+            currentValue
+        }
+    }
 
-            if (!isSkipped) {
-                hasSignificantChanges = true
-                val previousValue = previousArgs[argumentName]
-                changesLog.apply {
-                    append("\n••• $argumentName: ")
-                    append("${previousValue.safeToString()} (${previousValue.safeHashCode()}) → ")
-                    append("${currentValue.safeToString()} (${currentValue.safeHashCode()})")
+    if (!isInitialComposition.value) {
+        for ((argumentName, currentUnwrappedValue) in currentUnwrappedArgs) {
+            if (previousArgs.containsKey(argumentName) && currentUnwrappedValue != previousArgs[argumentName]) {
+                hasAnyChanges = true
+                val isSkipped = skippedArgumentNames.contains(argumentName)
+
+                if (!isSkipped) {
+                    hasSignificantChanges = true
+                    val previousUnwrappedValue = previousArgs[argumentName]
+                    changesLog.apply {
+                        append("\n••• $argumentName: ")
+                        // Add a (State) hint if the *original* argument was a State
+                        if (arguments[argumentName] is State<*>) {
+                            append("(State) ")
+                        }
+                        append("${previousUnwrappedValue.safeToString()} (${previousUnwrappedValue.safeHashCode()}) → ")
+                        append("${currentUnwrappedValue.safeToString()} (${currentUnwrappedValue.safeHashCode()})")
+                    }
                 }
             }
         }
     }
 
-    if (hasAnyChanges) {
-        previousArgs.clear()
-        previousArgs.putAll(arguments)
-    }
+
+    previousArgs.clear()
+    previousArgs.putAll(currentUnwrappedArgs)
 
     if (!isInitialComposition.value) {
         val shouldLog = hasSignificantChanges || !hasAnyChanges
@@ -92,7 +107,6 @@ inline fun RecompositionTracker(
         }
     }
 }
-
 
 @PublishedApi
 internal class Ref<T>(var value: T)

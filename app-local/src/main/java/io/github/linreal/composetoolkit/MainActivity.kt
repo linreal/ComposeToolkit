@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -130,6 +131,91 @@ private fun ToolkitDemoHost(modifier: Modifier = Modifier) {
                 "Observe which changes trigger logging."
         ) {
             MixedParametersSample()
+        }
+
+        RecompositionCaseCard(
+            title = "External state as param tracking",
+            description = "If, for performance reasons, you pass State as param to composable, " +
+            "tracker will unwrap it's value and log it's change along with other params "
+        ) {
+            ExternalStateChangeSample()
+        }
+    }
+}
+
+@Composable
+private fun ExternalStateChangeSample() {
+    val externalCounter = remember { mutableIntStateOf(0) }
+    val externalText = remember { mutableStateOf("External State") }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Parent manages State<T> and passes it down:",
+            style = MaterialTheme.typography.labelMedium
+        )
+
+        // Child composable that receives State<T> objects
+        ExternalStateConsumer(
+            counterState = externalCounter,
+            textState = externalText
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        OutlinedTextField(
+            value = externalText.value,
+            onValueChange = { externalText.value = it },
+            label = { Text("External text state") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "External counter: ${externalCounter.intValue}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+            )
+            Button(onClick = { externalCounter.intValue++ }) {
+                Text("Increment")
+            }
+            Button(onClick = { externalCounter.intValue = 0 }) {
+                Text("Reset")
+            }
+        }
+    }
+}
+
+@TrackRecompositions
+@Composable
+private fun ExternalStateConsumer(
+    counterState: State<Int>,
+    textState: State<String>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Tracked composable receiving State<T> objects:",
+                style = MaterialTheme.typography.labelSmall
+            )
+            Text(
+                text = "Counter from parent: ${counterState.value}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Text from parent: \"${textState.value}\"",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
